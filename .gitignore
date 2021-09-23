@@ -1,0 +1,23 @@
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+media
+
+# User-specific stuff
+.idea/
+
+# dotenv
+.env
+
+# IntelliJ
+out/
+
+# virtualenv
+venv/
+ENV/
+
+_migrations/*
+!_migrations/__init__.py
