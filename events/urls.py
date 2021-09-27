@@ -3,7 +3,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from events import views
 
 urlpatterns = [
-    path('get/', views.RetrieveEvents.as_view()),
+    path('<slug:slug>/', views.RetrieveEvents.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
