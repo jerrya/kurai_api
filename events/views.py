@@ -12,13 +12,18 @@ WEI = 10 ** 18
 class RetrieveEvents(APIView):
     def get(self, request, slug, format=None):
         if slug:
+            # Iterate through events api with offset
+            # 0.6 second delay
+            # logic to pull from db if such records already exist
+            # ^ dependent on timestamp in database and use it as part of the occured_before value
             url = "https://api.opensea.io/api/v1/events"
             querystring = {
                 "collection_slug": slug,
                 "event_type": "successful",
                 "only_opensea": "true",
                 "offset": "0",
-                "limit": "20"
+                "limit": "300",
+                "occurred_after": ""
             }
             headers = {
                 "Accept": "application/json"
