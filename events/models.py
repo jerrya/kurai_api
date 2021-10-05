@@ -2,6 +2,7 @@ from django.db import models
 
 
 class Event(models.Model):
+    collection_slug = models.CharField(max_length=100)  # [asset_events][i][asset][collection][slug]
     buyer_address = models.CharField(max_length=100)  # [asset_events][i][winner_account][address]
     seller_address = models.CharField(max_length=100)  # [asset_events][i]["seller"]["address"]
     contract_address = models.CharField(max_length=100)  # [asset_events][i][asset][asset_contract][address]
