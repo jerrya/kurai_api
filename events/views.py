@@ -14,13 +14,21 @@ API_PAGINATION_LIMIT = 300
 class RetrieveEvents(APIView):
     def get(self, request, slug, format=None):
         if slug:
-            # save data to db
-            # Iterate through events api with offset
-            # 0.6 second delay
+            # 1. fetch data from db, if it exists
+            # 2a. Iterate through events api with offset, and save data to db.
+            # 2b. 0.6 second delay.
             # logic to pull from db if such records already exist
             # ^ dependent on timestamp in database and use it as part of the occurred_before value
             data = []
             url = "https://api.opensea.io/api/v1/events"
+            # fetch data from db, if it exists - https://stackoverflow.com/questions/3090302/how-do-i-get-the-object-if-it-exists-or-none-if-it-does-not-exist-in-django
+            try:
+                data_from_db = Event.objects.get(collection_slug='slug')
+            except data_from_db.DoesNotExist:
+                data_from_db = None
+            if data_from_db is not None:
+                data.append(data_from_db) # ???
+                latest_time = data_from_db.latest('timestamp') # ??? to feed into occurred_after?
             i = 0
             while True:
                 querystring = {
@@ -58,7 +66,7 @@ class RetrieveEvents(APIView):
                 else:
                     # we've exhausted the API history
                     break
-                time.sleep(0.6)  # sleep to prevent throttling.
+                time.sleep(0.6)  # 2b. 0.6 second delay to prevent API throttling.
                 i += 1
             serializer = EventSerializer(data, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
