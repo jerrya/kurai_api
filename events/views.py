@@ -11,6 +11,7 @@ import time
 WEI = 10 ** 18
 API_PAGINATION_LIMIT = 300
 
+
 class RetrieveEvents(APIView):
     def get(self, request, slug, format=None):
         if slug:
@@ -51,6 +52,7 @@ class RetrieveEvents(APIView):
                             continue
                         try:
                             e = Event.objects.create(
+                                id=trade["transaction"]["transaction_hash"],
                                 collection_slug=trade["asset"]["collection"]["slug"],
                                 buyer_address=trade["winner_account"]["address"],
                                 seller_address=trade["seller"]["address"],
@@ -58,7 +60,6 @@ class RetrieveEvents(APIView):
                                 price=trade["total_price"],
                                 timestamp=trade["transaction"]["timestamp"],
                                 token_id=trade["asset"]["token_id"],
-                                transaction_hash=trade["transaction"]["transaction_hash"],
                                 event_type=trade["event_type"]
                             )
                             data.append(e)
