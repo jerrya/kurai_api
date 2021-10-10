@@ -23,12 +23,13 @@ class RetrieveEvents(APIView):
             url = "https://api.opensea.io/api/v1/events"
             # fetch data from db, if it exists - https://stackoverflow.com/questions/3090302/how-do-i-get-the-object-if-it-exists-or-none-if-it-does-not-exist-in-django
             try:
-                data_from_db = Event.objects.get(collection_slug='slug')
-            except data_from_db.DoesNotExist:
+                data_from_db = Event.objects.filter(collection_slug=slug).order_by('-timestamp')
+            except:
                 data_from_db = None
-            if data_from_db is not None:
+            print(data_from_db)
+            if data_from_db is not None and len(data_from_db) > 0:
                 data.append(data_from_db) # ???
-                latest_time = data_from_db.latest('timestamp') # ??? to feed into occurred_after?
+                latest_time = data_from_db.first().timestamp  # ??? to feed into occurred_after?
             i = 0
             while True:
                 querystring = {
