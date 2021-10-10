@@ -22,6 +22,7 @@ class RetrieveEvents(APIView):
             # ^ dependent on timestamp in database and use it as part of the occurred_before value
             data = []
             url = "https://api.opensea.io/api/v1/events"
+            latest_time = None
             # fetch data from db, if it exists - https://stackoverflow.com/questions/3090302/how-do-i-get-the-object-if-it-exists-or-none-if-it-does-not-exist-in-django
             try:
                 data_from_db = Event.objects.filter(collection_slug=slug).order_by('-timestamp')
@@ -29,7 +30,7 @@ class RetrieveEvents(APIView):
                 data_from_db = None
             print(data_from_db)
             if data_from_db is not None and len(data_from_db) > 0:
-                data.append(data_from_db) # ???
+                data += data_from_db # ???
                 latest_time = data_from_db.first().timestamp  # ??? to feed into occurred_after?
             i = 0
             while True:
@@ -39,15 +40,21 @@ class RetrieveEvents(APIView):
                     "only_opensea": "true",
                     "offset": str(i*API_PAGINATION_LIMIT),
                     "limit": str(API_PAGINATION_LIMIT),
-                    # "occurred_after": "" # TODO
                 }
+                if latest_time is not None:
+                    querystring["occurred_after"] = latest_time
                 headers = {"Accept": "application/json"}
-
+                print(querystring)
                 response = requests.request("GET", url, headers=headers, params=querystring)
-                json = response.json()["asset_events"]
-                if response.status_code == status.HTTP_200_OK and len(json) > 0:
+                json = response.json()
+                print(json)
+                if response.status_code == status.HTTP_200_OK and len(json) > 0 and "asset_events" in json:
+                    json = response.json()["asset_events"]
+                    if not json:
+                        break
                     print("Looping through offset {}".format(i*API_PAGINATION_LIMIT))
                     for trade in json:
+                        print(trade)
                         if trade["transaction"]["timestamp"] is None:
                             continue
                         try:
@@ -70,6 +77,8 @@ class RetrieveEvents(APIView):
                     break
                 time.sleep(0.6)  # 2b. 0.6 second delay to prevent API throttling.
                 i += 1
+            print(len(data_from_db))
+            print(len(data))
             serializer = EventSerializer(data, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response("An error occurred.", status=status.HTTP_404_NOT_FOUND)
