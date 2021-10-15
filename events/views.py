@@ -10,7 +10,7 @@ import time
 
 WEI = 10 ** 18
 API_PAGINATION_LIMIT = 300
-
+MAX_POINTS_TO_RENDER = 1000
 
 class RetrieveEvents(APIView):
     def get(self, request, slug, format=None):
@@ -30,7 +30,7 @@ class RetrieveEvents(APIView):
                 data_from_db = None
             print(data_from_db)
             if data_from_db is not None and len(data_from_db) > 0:
-                data += data_from_db # ???
+                data += data_from_db
                 latest_time = data_from_db.first().timestamp  # ??? to feed into occurred_after?
             i = 0
             while True:
@@ -79,6 +79,18 @@ class RetrieveEvents(APIView):
                 i += 1
             print(len(data_from_db))
             print(len(data))
-            serializer = EventSerializer(data, many=True)
+            compressed_data = []
+            if len(data) <= 1000:
+                compressed_data = data
+            else:
+                numerator_length = len(data)
+                denominator_length = MAX_POINTS_TO_RENDER
+                compressed_data = [data[i // denominator_length] for i in range(0, denominator_length*MAX_POINTS_TO_RENDER, numerator_length)]
+            print("COMPRESSED")
+            print(compressed_data[0:100])
+            print("UN-COMPRESSED")
+            print(data[0:100])
+            serializer = EventSerializer(compressed_data, many=True)
+            print(Response(serializer.data, status=status.HTTP_200_OK))
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response("An error occurred.", status=status.HTTP_404_NOT_FOUND)
