@@ -85,6 +85,7 @@ class RetrieveEvents(APIView):
             else:
                 numerator_length = len(data)
                 denominator_length = MAX_POINTS_TO_RENDER
+                # syntax: https://stackoverflow.com/questions/63293769/select-every-nth-element-in-list-with-n-rational-non-integer
                 compressed_data = [data[i // denominator_length] for i in range(0, denominator_length*MAX_POINTS_TO_RENDER, numerator_length)]
             print("COMPRESSED")
             print(compressed_data[0:100])
