@@ -17,16 +17,6 @@ def event_to_series(event_data, label_name="txns"):
           // ...
         ]
       },
-      {
-        label: 'React Query",
-        data: [
-          {
-            date: new Date(),
-            stars: 10234230,
-          }
-          // ...
-        ]
-      }
     ]
     """
     my_series = []
